@@ -38,7 +38,15 @@ import { ISessionData } from './helpers/sesion';
               daraja: null,
               portfoly: null,
               rezyumey: null,
-              ish_holati: null
+              ish_holati: null,
+              universitet: null,
+              home_1: null,
+              home_2: null,
+              age: null,
+              ism: null,
+              yonalish: null,
+              til: null,
+              AA: null,
             },
             Update: {
               telefon_1: null,
@@ -46,7 +54,14 @@ import { ISessionData } from './helpers/sesion';
               daraja: null,
               portfoly: null,
               rezyumey: null,
-              ish_holati: null
+              ish_holati: null,
+              universitet: null,
+              home_1: null,
+              home_2: null,
+              age: null,
+              ism: null,
+              yonalish: null,
+              til: null,
             },
             IsData: {
               fullName: null,

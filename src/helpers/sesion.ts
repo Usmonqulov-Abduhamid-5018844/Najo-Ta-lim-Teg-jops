@@ -17,21 +17,36 @@ export interface ISessionData {
     ish_holati: string | null;
     till?: string[] | null;
   };
-  IsUpdate:{
-    telefon_1: string | null
-    telefon_2: string | null
-    daraja: string | null
-    portfoly: string | null
-    rezyumey: string | null
-    ish_holati: string | null
+  IsUpdate: {
+    telefon_1: string | null;
+    telefon_2: string | null;
+    daraja: string | null;
+    portfoly: string | null;
+    rezyumey: string | null;
+    ish_holati: string | null;
+    universitet: string | null;
+    home_1: string | null;
+    home_2: string | null;
+    age: string | null;
+    ism: string | null;
+    yonalish: string | null;
+    til: string | null;
+    AA: string | null;
   };
-  Update:{
-    telefon_1: string | null
-    telefon_2: string | null
-    daraja: string | null
-    portfoly: string | null
-    rezyumey: string | null
-     ish_holati: string | null
+  Update: {
+    telefon_1: string | null;
+    telefon_2: string | null;
+    daraja: string | null;
+    portfoly: string | null;
+    rezyumey: string | null;
+    ish_holati: string | null;
+    universitet: string | null;
+    home_1: string | null;
+    home_2: string | null;
+    age: string | null;
+    ism: string | null;
+    yonalish: string | null;
+    til?: string[] | null;
   };
 
   IsData: {

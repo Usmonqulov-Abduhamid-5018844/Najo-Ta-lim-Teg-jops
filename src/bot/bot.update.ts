@@ -1,4 +1,12 @@
-import { Update, Start, Ctx, Hears, On, Command } from 'nestjs-telegraf';
+import {
+  Update,
+  Start,
+  Ctx,
+  Hears,
+  On,
+  Command,
+  Message,
+} from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { BotService } from './bot.service';
 import { MyContext } from 'src/helpers/sesion';
@@ -26,9 +34,7 @@ export class BotUpdate {
     } else {
       ctx.reply(
         `Asssalamu alaykum hurmatli foydalanuvchi`,
-        Markup.keyboard([['Register', 'Setings'], ['Mydata']])
-          .resize()
-          .oneTime(),
+        Markup.keyboard([['Register', 'Setings'], ['Mydata']]).resize(),
       );
     }
   }
@@ -83,9 +89,22 @@ export class BotUpdate {
       "Assalomu alaykum bu bo'limda siz malumotlaringizni o'zgaritiishingiz munkin",
       Markup.keyboard([
         ['Telefon', 'daraja'],
-        ['Portfoli link', 'Rezyumey link'],
-        ['status'],
+        ['Portfoli', 'Rezyumey'],
+        ['status', 'universitet'],
+
+        ['ism familiya', "yo'nalish"],
+        ['doyimiy yashash manzil', 'hozirgi yashash manzil'],
+        ['till', 'yosh'],
+        ['ortga'],
       ]).resize(),
+    );
+    ctx.session.IsUpdate.AA = 'AAA';
+  }
+  @Hears('ortga')
+  onOrtga(@Ctx() ctx: MyContext) {
+    ctx.reply(
+      'Asosiy menyu',
+      Markup.keyboard([['Register', 'Setings'], ['Mydata']]).resize(),
     );
   }
   @Hears('Telefon')
@@ -127,14 +146,14 @@ export class BotUpdate {
     );
     ctx.session.IsUpdate.daraja = 'daraja';
   }
-  @Hears('Portfoli link')
+  @Hears('Portfoli')
   onPortfoly(@Ctx() ctx: MyContext) {
-    ctx.reply('Yangi portfoliya linkini kriting...');
+    ctx.reply('Yangi portfoliya fayl shaklida kriting...');
     ctx.session.IsUpdate.portfoly = 'portfoly';
   }
-  @Hears('Rezyumey link')
+  @Hears('Rezyumey')
   onRezyume(@Ctx() ctx: MyContext) {
-    ctx.reply('Yangi Rezyume linkini kriting...');
+    ctx.reply('Yangi Rezyume fayl shaklida kriting...');
     ctx.session.IsUpdate.rezyumey = 'rezyumey';
   }
 
@@ -164,7 +183,7 @@ export class BotUpdate {
           },
         });
       }
-      return
+      return;
     }
     if (ctx.session.IsUpdate.telefon_2 == 'telefon_2') {
       if (ctx.message && 'contact' in ctx.message) {
@@ -175,31 +194,73 @@ export class BotUpdate {
         }
       }
     }
-    if(ctx.session.IsData.tel_1 == "tel_1"){
-      if(ctx.message && "contact" in ctx.message){
+    if (ctx.session.IsData.tel_1 == 'tel_1') {
+      if (ctx.message && 'contact' in ctx.message) {
         ctx.session.formData.tel_1 = ctx.message.contact.phone_number;
-        ctx.session.IsData.tel_1 = null
-        ctx.session.IsData.tel_2 = "tel_2"
-        ctx.reply(`📞 2 - Telefon raqamingizni kriting`,{
-          reply_markup:{
-            keyboard:[
-              [{text: `📲 Raqamni ulashish`,request_contact:true}],
+        ctx.session.IsData.tel_1 = null;
+        ctx.session.IsData.tel_2 = 'tel_2';
+        ctx.reply(`📞 2 - Telefon raqamingizni kriting`, {
+          reply_markup: {
+            keyboard: [
+              [{ text: `📲 Raqamni ulashish`, request_contact: true }],
             ],
-            resize_keyboard:true,
-            one_time_keyboard:true
-          }
-        })
+            resize_keyboard: true,
+            one_time_keyboard: true,
+          },
+        });
       }
-      return
+      return;
     }
-    if(ctx.session.IsData.tel_2 == "tel_2"){
-      if(ctx.message && "contact" in ctx.message){
+    if (ctx.session.IsData.tel_2 == 'tel_2') {
+      if (ctx.message && 'contact' in ctx.message) {
         ctx.session.formData.tel_2 = ctx.message.contact.phone_number;
-        ctx.session.IsData.tel_2 = null
-         ctx.session.IsData.age = 'age';
+        ctx.session.IsData.tel_2 = null;
+        ctx.session.IsData.age = 'age';
         ctx.reply('Yoshingizni kriting...');
       }
-      return
+      return;
+    }
+  }
+
+  @On('document')
+  async onDocument(@Ctx() ctx: MyContext) {
+    if (ctx.session.IsData.rezumey_link === 'rezumey_link') {
+      if (ctx.message && 'document' in ctx.message) {
+        ctx.session.formData.rezumey_link = ctx.message.document.file_id;
+        ctx.session.IsData.rezumey_link = null;
+        ctx.session.IsData.portfoly_link = 'portfoly_link';
+        ctx.reply('Portfoliyangizni fayl shaklida tashlayng...');
+        return;
+      }
+    }
+    if (ctx.session.IsData.portfoly_link === 'portfoly_link') {
+      if (ctx.message && 'document' in ctx.message) {
+        ctx.session.formData.portfoly_link = ctx.message.document.file_id;
+        ctx.session.IsData.portfoly_link = null;
+        ctx.session.IsData.tel_1 = 'tel_1';
+        ctx.reply('📞 Telefon raqamingizni ulashing', {
+          reply_markup: {
+            keyboard: [
+              [{ text: '📲 Raqamni ulashish', request_contact: true }],
+            ],
+            resize_keyboard: true,
+            one_time_keyboard: true,
+          },
+        });
+        return;
+      }
+    }
+    if (ctx.message && 'document' in ctx.message) {
+      if (ctx.session.IsUpdate.portfoly === 'portfoly') {
+        ctx.session.Update.portfoly = ctx.message.document.file_id;
+        ctx.session.IsUpdate.portfoly = null;
+        return this.botService.update(ctx);
+      }
+      if (ctx.session.IsUpdate.rezyumey === 'rezyumey') {
+        ctx.session.Update.rezyumey = ctx.message.document.file_id;
+        ctx.session.IsUpdate.rezyumey = null;
+        return this.botService.update(ctx);
+      }
     }
   }
 
@@ -217,20 +278,155 @@ export class BotUpdate {
           return this.botService.update(ctx);
         }
       }
-      if (ctx.session.IsUpdate.portfoly === 'portfoly') {
-        ctx.session.Update.portfoly = text;
-        ctx.session.IsUpdate.portfoly = null;
-        return this.botService.update(ctx);
-      }
-      if (ctx.session.IsUpdate.rezyumey === 'rezyumey') {
-        ctx.session.Update.rezyumey = text;
-        ctx.session.IsUpdate.rezyumey = null;
-        return this.botService.update(ctx);
-      }
       if (ctx.session.IsUpdate.ish_holati === 'ish_holati') {
         ctx.session.Update.ish_holati = text;
         ctx.session.IsUpdate.ish_holati = null;
         return this.botService.update(ctx);
+      }
+    }
+
+    if (ctx.session.IsUpdate.AA == 'AAA') {
+      if (ctx.message && 'text' in ctx.message) {
+        const text = ctx.message.text;
+
+        if (text === 'universitet') {
+          ctx.reply(
+            "O'qigan talim dargohingizni tanlayng",
+            Markup.keyboard([
+              ['Najot Taʼlim', 'Mohirdev'],
+              ['PDP', 'Boshqa'],
+            ])
+              .oneTime()
+              .resize(),
+          );
+          ctx.session.IsUpdate.universitet = 'universitet';
+          return;
+        }
+        if (ctx.session.IsUpdate.universitet === 'universitet') {
+          if (text == 'Boshqa') {
+            ctx.reply("Universitet nomini qo'lda kiriting...");
+            return;
+          }
+          ctx.session.Update.universitet = text;
+          ctx.session.IsUpdate.universitet = null;
+          ctx.session.IsUpdate.AA = null;
+          return this.botService.update(ctx);
+        }
+        if (text === 'ism familiya') {
+          ctx.reply('Ism familyangizni kriting...');
+          ctx.session.IsUpdate.ism = 'ism';
+          return;
+        }
+        if (ctx.session.IsUpdate.ism === 'ism') {
+          ctx.session.Update.ism = text;
+          ctx.session.IsUpdate.ism = null;
+          ctx.session.IsUpdate.AA = null;
+          return this.botService.update(ctx);
+        }
+        if (text === "yo'nalish") {
+          ctx.reply(
+            "Yo'nalishingiz qaysi Categoriyaga to'g'ri keladi",
+            Markup.keyboard([
+              ['Dasturlash (Frontend, Backend, Full Stack, AI)'],
+              ['IT va Dizayn (UI/UX, QA, Data, Security)'],
+              ['Marketing va Media'],
+              ['Grafik Dizayn va Sotuv'],
+              ['Boshqa'],
+            ])
+              .resize()
+              .oneTime(),
+          );
+          ctx.session.IsUpdate.yonalish = 'yonalish';
+          return;
+        }
+        if (ctx.session.IsUpdate.yonalish === 'yonalish') {
+          if (text === 'Boshqa') {
+            ctx.reply("Yo'nalishingizni qo'lda kiriting...");
+            return;
+          }
+          ctx.session.Update.yonalish = text;
+          ctx.session.IsUpdate.yonalish = null;
+          ctx.session.IsUpdate.AA = null;
+          return this.botService.update(ctx);
+        }
+        if (text == 'doyimiy yashash manzil') {
+          ctx.reply('Doyimiy yashash manzilingizni kriting...');
+          ctx.session.IsUpdate.home_1 = 'Doyimiy';
+          return;
+        }
+        if (ctx.session.IsUpdate.home_1 === 'Doyimiy') {
+          ctx.session.Update.home_1 = text;
+          ctx.session.IsUpdate.home_1 = null;
+          ctx.session.IsUpdate.AA = null;
+          return this.botService.update(ctx);
+        }
+
+        if (text == 'hozirgi yashash manzil') {
+          ctx.reply('Hozirgi yashash manzilingizni kriting...');
+          ctx.session.IsUpdate.home_2 = 'Hozirgi';
+          return;
+        }
+        if (ctx.session.IsUpdate.home_2 === 'Hozirgi') {
+          ctx.session.Update.home_2 = text;
+          ctx.session.IsUpdate.home_2 = null;
+          ctx.session.IsUpdate.AA = null;
+          return this.botService.update(ctx);
+        }
+        if (text === 'yosh') {
+          ctx.reply('Yoshingisni kriting...');
+          ctx.session.IsUpdate.age = 'Yosh';
+          return;
+        }
+        if (ctx.session.IsUpdate.age === 'Yosh') {
+          ctx.session.Update.age = text;
+          ctx.session.IsUpdate.age = null;
+          ctx.session.IsUpdate.AA = null;
+          return this.botService.update(ctx);
+        }
+        if (text === 'till') {
+          ctx.reply(
+            'Muloqot darajasida qaysi tillarni bilasiz',
+            Markup.keyboard([
+              ['Ingliz tili', 'Rus tili'],
+              ['Nemis tili', 'Yapon tili'],
+              ['Kareys tili', 'Xitoy tili'],
+              ['Boshqa', 'keyingi'],
+            ]).resize(),
+          );
+          ctx.session.IsUpdate.til = 'Till';
+          return;
+        }
+        if (ctx.session.IsUpdate.til === 'Till') {
+          if (!ctx.session.Update.til) {
+            ctx.session.Update.til = [];
+          }
+          if (text === 'Boshqa') {
+            ctx.reply(
+              "Muloqot darajasida qaysi tillarni bilasiz qo'lda kiriting...",
+            );
+            return;
+          }
+          if (text === 'keyingi') {
+            ctx.session.IsUpdate.til = null;
+            ctx.session.IsUpdate.AA = null;
+            return this.botService.update(ctx);
+          } else if (!ctx.session.Update.til?.includes(text)) {
+            ctx.session.Update.til?.push(text);
+            ctx.reply(
+              `✅ ${text} qo'shildi. Yana til tanlashingiz mumkin yoki "keyingi" tugmasini bosing.`,
+              Markup.keyboard([
+                ['Ingliz tili', 'Rus tili'],
+                ['Nemis tili', 'Yapon tili'],
+                ['Kareys tili', 'Xitoy tili'],
+                ['Boshqa', 'keyingi'],
+              ]).resize(),
+            );
+            return;
+          } else {
+            ctx.reply(`⚠️ ${text} allaqachon tanlangan.`);
+            return;
+          }
+        }
       }
     }
 
@@ -367,6 +563,35 @@ export class BotUpdate {
         );
         return;
       }
+      if (ctx.session.IsData.rezumey_link === 'rezumey_link') {
+        if (ctx.message && 'text' in ctx.message) {
+          if (ctx.message.text === 'Ortga') {
+            ctx.session.IsData.rezumey_link = null;
+            ctx.session.IsData.ish_holati = 'ish_holati';
+            ctx.reply(
+              'Hozirda ishlayapsizmi yoki ish qidiryapsizmi?',
+              Markup.keyboard([
+                ['Xa, ishlayapman', 'Aktiv ish qidiryapman'],
+                ["Yo'q ishlamayabman", 'Ortga'],
+              ])
+                .resize()
+                .oneTime(),
+            );
+            return;
+          }
+        }
+      }
+      if (ctx.session.IsData.portfoly_link === 'portfoly_link') {
+        if (ctx.message && 'text' in ctx.message) {
+          if (ctx.message.text === 'Ortga') {
+            ctx.session.IsData.rezumey_link = 'rezumey_link';
+            ctx.session.IsData.portfoly_link = null;
+            ctx.reply('Reziumeyingizni fayl shaklida tashlayng...');
+            return;
+          }
+        }
+      }
+
       if (ctx.session.IsData.universitet === 'universitet') {
         if (text === 'Ortga') {
           ctx.session.IsData.universitet = null;
@@ -519,6 +744,32 @@ export class BotUpdate {
           return;
         }
       }
+      if (
+        ctx.session.IsUpdate.portfoly === 'portfoly' ||
+        ctx.session.IsUpdate.rezyumey === 'rezyumey'
+      ) {
+        ctx.reply(
+          "❌ portfoliy yoki reziume noto'g'ri formadda kritildi",
+          Markup.keyboard([
+            ['Telefon', 'daraja'],
+            ['Portfoli', 'Rezyumey'],
+            ['status'],
+          ]).resize(),
+        );
+        return;
+      }
+      if (ctx.session.IsData.rezumey_link == 'rezumey_link') {
+        ctx.reply(
+          "❌ Reziume noto'g'ri formadda kiritildi iltimos reziumingisni faly shaklida kiriting",
+        );
+        return;
+      }
+      if (ctx.session.IsData.portfoly_link == 'portfoly_link') {
+        ctx.reply(
+          "❌ partfoly noto'g'ri formadda kiritildi iltimos partfolyingizni faly shaklida kiriting",
+        );
+        return;
+      }
       if (ctx.session.IsData.ish_holati === 'ish_holati') {
         if (text === 'Ortga') {
           ctx.reply(
@@ -537,45 +788,9 @@ export class BotUpdate {
           ctx.session.formData.ish_holati = text;
           ctx.session.IsData.ish_holati = null;
           ctx.session.IsData.rezumey_link = 'rezumey_link';
-          ctx.reply('Reziumeyingizni linkini tashlayng...');
+          ctx.reply('Reziumeyingizni fayl shaklida tashlayng...');
         }
         return;
-      }
-      if (ctx.session.IsData.rezumey_link === 'rezumey_link') {
-        if (text === 'Ortga') {
-          ctx.reply('Reziumeyingizni linkini tashlayng...');
-          ctx.session.IsData.rezumey_link = null;
-          ctx.session.IsData.ish_holati = 'ish_holati';
-          return;
-        } else {
-          ctx.session.formData.rezumey_link = text;
-          ctx.session.IsData.rezumey_link = null;
-          ctx.session.IsData.portfoly_link = 'portfoly_link';
-          ctx.reply('Portfoly linkizgi tashlayng...');
-          return;
-        }
-      }
-      if (ctx.session.IsData.portfoly_link === 'portfoly_link') {
-        if (text === 'Ortga') {
-          ctx.session.IsData.rezumey_link = 'rezumey_link';
-          ctx.session.IsData.portfoly_link = null;
-          ctx.reply('Reziumeyingizni linkini tashlayng...');
-          return;
-        } else {
-          ctx.session.formData.portfoly_link = text;
-          ctx.session.IsData.portfoly_link = null;
-          ctx.session.IsData.tel_1 = 'tel_1';
-          ctx.reply('📞 Telefon raqamingizni ulashing', {
-            reply_markup: {
-              keyboard: [
-                [{ text: '📲 Raqamni ulashish', request_contact: true }],
-              ],
-              resize_keyboard: true,
-              one_time_keyboard: true,
-            },
-          });
-          return;
-        }
       }
       if (ctx.session.IsData.age === 'age') {
         ctx.session.formData.age = text;
@@ -597,25 +812,34 @@ export class BotUpdate {
           message += `🏡 <b>Hozirgi manzil:</b> ${data.addres_hozir}\n\n`;
         if (data.universitet)
           message += `🎓 <b>Universitet:</b> ${data.universitet}\n\n`;
-        if (data.yonalish) message += `🛠 <b>Yo'nalish:</b> ${data.yonalish}\n\n`;
+        if (data.yonalish)
+          message += `🛠 <b>Yo'nalish:</b> ${data.yonalish}\n\n`;
         if (data.daraja) message += `🚀 <b>Daraja:</b> ${data.daraja}\n\n`;
         if (data.ish_holati)
           message += `💼 <b>Ish holati:</b> ${data.ish_holati}\n\n`;
-        if (data.rezumey_link)
-          message += `📎 <b>Rezume link:</b> ${data.rezumey_link}\n\n`;
-        if (data.portfoly_link)
-          message += `🔗 <b>Portfolio link:</b> ${data.portfoly_link}\n\n`;
         if (data.till && data.till.length)
           message += `🌐 <b>Bilgan tillar:</b> ${data.till.join(', ')}\n\n`;
 
-        ctx.reply(message, {
+        await ctx.reply(message, {
           parse_mode: 'HTML',
-          reply_markup: {
-            keyboard: [['Home']],
-            resize_keyboard: true,
-            one_time_keyboard: true,
-          },
         });
+        if (data.rezumey_link) {
+          await ctx.replyWithDocument(data.rezumey_link, {
+            caption: '📎 Rezume',
+          });
+        }
+
+        if (data.portfoly_link) {
+          await ctx.replyWithDocument(data.portfoly_link, {
+            caption: '🔗 Portfolio',
+          });
+        }
+        ctx.reply(
+          'Home',
+          Markup.keyboard([['Home']])
+            .resize()
+            .oneTime(),
+        );
         return;
       }
     }
