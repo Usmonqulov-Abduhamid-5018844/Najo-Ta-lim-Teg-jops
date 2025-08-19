@@ -25,7 +25,7 @@ export class BotService {
       till,
       universitet,
     } = ctx.session.formData;
-    const chat_id = String(ctx.from?.id) + 1
+    const chat_id = String(ctx.from?.id)
 
     if (
       tel_1 &&
@@ -45,7 +45,7 @@ export class BotService {
       chat_id
     ) {
       try {
-        await this.prisma.users.create({
+       await this.prisma.users.create({
           data: {
             tel_1,
             tel_2,
@@ -64,7 +64,7 @@ export class BotService {
             chat_id,
           },
         });
-
+        
       } catch (error) {
         console.log(error);
       }
@@ -176,15 +176,13 @@ export class BotService {
 🏠 Doimiy manzil: ${mydata.addres_doyimiy || "Ko'rsatilmagan"}\n
 🏢 Hozirgi manzil: ${mydata.addres_hozir || "Ko'rsatilmagan"}\n
 ⚙️ Ish holati: ${mydata.ish_holati || "Ko'rsatilmagan"}\n
+💼 Portfoly ${mydata.portfoly_link || "Ko'rsatilmagan"}\n
 🎂 Yosh: ${mydata.age || "Ko'rsatilmagan"}\n
 `;
 
       await ctx.reply(info);
       await ctx.replyWithDocument(mydata.rezumey_link, {
         caption: '📎 Rezume',
-      });
-      await ctx.replyWithDocument(mydata.portfoly_link, {
-        caption: '🔗 Portfolio',
       });
     } catch (error) {
       console.error(error);
@@ -227,6 +225,7 @@ export class BotService {
         message += `🌐 <b>Til bilish:</b> ${Array.isArray(mydata.till) ? mydata.till.join(', ') : "Ko'rsatilmagan"}\n`;
         message += `🏠 <b>Doimiy manzil:</b> ${mydata.addres_doyimiy || "Ko'rsatilmagan"}\n`;
         message += `🏢 <b>Hozirgi manzil:</b> ${mydata.addres_hozir || "Ko'rsatilmagan"}\n`;
+       message += ` 💼<b>Portfoly link</b> ${mydata.portfoly_link}\n`
         message += `⚙️ <b>Ish holati:</b> ${mydata.ish_holati || "Ko'rsatilmagan"}\n`;
         message += `🎂 <b>Yosh:</b> ${mydata.age || "Ko'rsatilmagan"}\n`;
 
@@ -235,11 +234,6 @@ export class BotService {
         if (mydata.rezumey_link) {
           await ctx.replyWithDocument(mydata.rezumey_link, {
             caption: '📎 Rezume',
-          });
-        }
-        if (mydata.portfoly_link) {
-          await ctx.replyWithDocument(mydata.portfoly_link, {
-            caption: '🔗 Portfolio',
           });
         }
 

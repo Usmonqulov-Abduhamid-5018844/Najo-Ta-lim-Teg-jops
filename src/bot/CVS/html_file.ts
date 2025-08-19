@@ -10,9 +10,6 @@ export async function fileURL(fileid: string, ctx: MyContext) {
 export async function generateUserHTML(users: any[], ctx: MyContext) {
   const rows = await Promise.all(
     users.map(async (item) => {
-      const portfolioUrl = item.portfoly_link
-        ? await fileURL(item.portfoly_link, ctx)
-        : null;
 
       const resumeUrl = item.rezumey_link
         ? await fileURL(item.rezumey_link, ctx)
@@ -37,7 +34,7 @@ export async function generateUserHTML(users: any[], ctx: MyContext) {
             ${Array.isArray(item.till) ? item.till.join(', ') : (item.till ?? '-')}
           </td>
           <td>
-            ${portfolioUrl ? `<a href="${portfolioUrl}" target="_blank">Portfolio</a>` : '-'}
+            ${item.portfoly_link ? `<a href="${item.portfoly_link}" target="_blank">Portfolio</a>` : '-'}
           </td>
           <td>
             ${resumeUrl ? `<a href="${resumeUrl}" target="_blank">Rezume</a>` : '-'}
@@ -52,6 +49,7 @@ export async function generateUserHTML(users: any[], ctx: MyContext) {
     <html>
       <head>
         <meta charset="UTF-8"/>
+        <link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSMrpcMKUuEB1NpeWP4wrfXNvs2ovEPuQVGQ&s"/>
         <title>Foydalanuvchilar</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 20px; }
@@ -67,7 +65,7 @@ export async function generateUserHTML(users: any[], ctx: MyContext) {
             min-width: 200px;
           }
           table { border-collapse: collapse; width: 100%; min-width: 1200px; }
-          th, td { border: 1px solid #ddd; padding:8px; text-align: left; }
+          th, td { border: 1px solid #ddd; padding:20px; text-align: left; }
           th { background-color: #f2f2f2; white-space: nowrap; }
           tr:nth-child(even) { background-color: #f9f9f9; }
           a { color: blue; text-decoration: underline; }
@@ -82,8 +80,8 @@ export async function generateUserHTML(users: any[], ctx: MyContext) {
               <th>Chat ID</th>
               <th>Ism Familiya</th>
               <th>Yosh</th>
-              <th>Tel 1</th>
-              <th>Tel 2</th>
+              <th>Telefon 1</th>
+              <th>Telefon 2</th>
               <th>Username</th>
               <th>Doimiy manzil</th>
               <th>Hozirgi manzil</th>

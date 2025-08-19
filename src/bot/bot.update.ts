@@ -15,7 +15,7 @@ import { generateUserHTML } from './CVS/html_file';
 
 @Update()
 export class BotUpdate {
-  private readonly Prisma: PrismaService
+  private readonly Prisma: PrismaService;
   private readonly ADMIN_CHAT_ID = (process.env.ADMIN_ID || '')
     .split(',')
     .map((id) => Number(id));
@@ -51,7 +51,7 @@ export class BotUpdate {
   }
   @Hears('HTML file')
   async onHtml(@Ctx() ctx: MyContext) {
-    const users = await this.prisma.users.findMany()
+    const users = await this.prisma.users.findMany();
 
     if (!users.length) {
       return ctx.reply('❌ Hech qanday foydalanuvchi topilmadi');
@@ -83,10 +83,10 @@ export class BotUpdate {
       const user = await this.prisma.users.findUnique({
         where: { chat_id: String(ctx.from?.id) },
       });
-      // if (user) {
-      //   ctx.reply("Siz avval fo'rmani to'ldirgansiz");
-      //   return;
-      // }
+      if (user) {
+        ctx.reply("Siz avval fo'rmani to'ldirgansiz");
+        return;
+      }
       ctx.reply(
         'Ism Familyangizni kriting.',
         Markup.keyboard([['Ortga']]).resize(),
@@ -137,7 +137,7 @@ export class BotUpdate {
       'Hozirda ishlayapsizmi yoki ish qidiryapsizmi?',
       Markup.keyboard([
         ['Xa, ishlayapman', 'Aktiv ish qidiryapman'],
-        ["Yo'q ishlamayabman"],
+        ["Yo'q ish qidirmayabman"],
       ])
         .resize()
         .oneTime(),
@@ -161,7 +161,7 @@ export class BotUpdate {
   }
   @Hears('Portfoli')
   onPortfoly(@Ctx() ctx: MyContext) {
-    ctx.reply('Yangi portfoliya fayl shaklida kriting...');
+    ctx.reply('Yangi portfoliya link shaklida kriting...');
     ctx.session.IsUpdate.portfoly = 'portfoly';
   }
   @Hears('Rezyumey')
@@ -242,33 +242,11 @@ export class BotUpdate {
         ctx.session.formData.rezumey_link = ctx.message.document.file_id;
         ctx.session.IsData.rezumey_link = null;
         ctx.session.IsData.portfoly_link = 'portfoly_link';
-        ctx.reply('Portfoliyangizni fayl shaklida tashlayng...');
-        return;
-      }
-    }
-    if (ctx.session.IsData.portfoly_link === 'portfoly_link') {
-      if (ctx.message && 'document' in ctx.message) {
-        ctx.session.formData.portfoly_link = ctx.message.document.file_id;
-        ctx.session.IsData.portfoly_link = null;
-        ctx.session.IsData.tel_1 = 'tel_1';
-        ctx.reply('📞 Telefon raqamingizni ulashing', {
-          reply_markup: {
-            keyboard: [
-              [{ text: '📲 Raqamni ulashish', request_contact: true }],
-            ],
-            resize_keyboard: true,
-            one_time_keyboard: true,
-          },
-        });
+        ctx.reply('Portfoliyangizni linke shaklida kriting...');
         return;
       }
     }
     if (ctx.message && 'document' in ctx.message) {
-      if (ctx.session.IsUpdate.portfoly === 'portfoly') {
-        ctx.session.Update.portfoly = ctx.message.document.file_id;
-        ctx.session.IsUpdate.portfoly = null;
-        return this.botService.update(ctx);
-      }
       if (ctx.session.IsUpdate.rezyumey === 'rezyumey') {
         ctx.session.Update.rezyumey = ctx.message.document.file_id;
         ctx.session.IsUpdate.rezyumey = null;
@@ -294,6 +272,11 @@ export class BotUpdate {
       if (ctx.session.IsUpdate.ish_holati === 'ish_holati') {
         ctx.session.Update.ish_holati = text;
         ctx.session.IsUpdate.ish_holati = null;
+        return this.botService.update(ctx);
+      }
+      if ((ctx.session.IsUpdate.portfoly == 'portfoly')) {
+        ctx.session.Update.portfoly = text;
+        ctx.session.IsUpdate.portfoly = null;
         return this.botService.update(ctx);
       }
     }
@@ -594,7 +577,7 @@ export class BotUpdate {
               'Hozirda ishlayapsizmi yoki ish qidiryapsizmi?',
               Markup.keyboard([
                 ['Xa, ishlayapman', 'Aktiv ish qidiryapman'],
-                ["Yo'q ishlamayabman", 'Ortga'],
+                ["Yo'q ish qidirmayabman", 'Ortga'],
               ])
                 .resize()
                 .oneTime(),
@@ -610,6 +593,20 @@ export class BotUpdate {
             ctx.session.IsData.portfoly_link = null;
             ctx.reply('Reziumeyingizni fayl shaklida tashlayng...');
             return;
+          } else {
+            ctx.session.IsData.portfoly_link = null
+            ctx.session.formData.portfoly_link = ctx.message.text;
+            ctx.session.IsData.rezumey_link = null
+            ctx.session.IsData.tel_1 = 'tel_1';
+            ctx.reply('📞 Telefon raqamingizni ulashing', {
+              reply_markup: {
+                keyboard: [
+                  [{ text: '📲 Raqamni ulashish', request_contact: true }],
+                ],
+                resize_keyboard: true,
+                one_time_keyboard: true,
+              },
+            });
           }
         }
       }
@@ -757,7 +754,7 @@ export class BotUpdate {
               'Hozirda ishlayapsizmi yoki ish qidiryapsizmi?',
               Markup.keyboard([
                 ['Xa, ishlayapman', 'Aktiv ish qidiryapman'],
-                ["Yo'q ishlamayabman", 'Ortga'],
+                ["Yo'q ish qidirmayabman", 'Ortga'],
               ])
                 .resize()
                 .oneTime(),
@@ -818,7 +815,7 @@ export class BotUpdate {
         ctx.session.formData.age = text;
         ctx.session.IsData.age = null;
         await this.botService.create(ctx);
-
+        
         const data = ctx.session.formData;
         let message = `<b>✅ Sizning ma'lumotlar muvofiyaqatliy saqlandi:</b>\n\n`;
 
@@ -839,6 +836,8 @@ export class BotUpdate {
         if (data.daraja) message += `🚀 <b>Daraja:</b> ${data.daraja}\n\n`;
         if (data.ish_holati)
           message += `💼 <b>Ish holati:</b> ${data.ish_holati}\n\n`;
+        if (data.portfoly_link)
+          message += `💼 <b>Portfoly link</b> ${data.portfoly_link}\n\n`
         if (data.till && data.till.length)
           message += `🌐 <b>Bilgan tillar:</b> ${data.till.join(', ')}\n\n`;
 
@@ -848,12 +847,6 @@ export class BotUpdate {
         if (data.rezumey_link) {
           await ctx.replyWithDocument(data.rezumey_link, {
             caption: '📎 Rezume',
-          });
-        }
-
-        if (data.portfoly_link) {
-          await ctx.replyWithDocument(data.portfoly_link, {
-            caption: '🔗 Portfolio',
           });
         }
         ctx.reply(
