@@ -11,9 +11,11 @@ import { Context, Markup } from 'telegraf';
 import { BotService } from './bot.service';
 import { MyContext } from 'src/helpers/sesion';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { generateUserHTML } from './CVS/html_file';
 
 @Update()
 export class BotUpdate {
+  private readonly Prisma: PrismaService
   private readonly ADMIN_CHAT_ID = (process.env.ADMIN_ID || '')
     .split(',')
     .map((id) => Number(id));
@@ -29,6 +31,7 @@ export class BotUpdate {
         Markup.keyboard([
           ["Foydalanuvchilarni ko'rish"],
           ['File import'],
+          ['HTML file'],
         ]).resize(),
       );
     } else {
@@ -45,6 +48,16 @@ export class BotUpdate {
   @Hears("Foydalanuvchilarni ko'rish")
   onFoydalanuvchilar(@Ctx() ctx: MyContext) {
     return this.botService.AllUsers(ctx);
+  }
+  @Hears('HTML file')
+  async onHtml(@Ctx() ctx: MyContext) {
+    const users = await this.prisma.users.findMany()
+
+    if (!users.length) {
+      return ctx.reply('❌ Hech qanday foydalanuvchi topilmadi');
+    }
+    const filePath = await generateUserHTML(users, ctx);
+    await ctx.replyWithDocument({ source: filePath, filename: 'users.html' });
   }
 
   @On('callback_query')
@@ -70,10 +83,10 @@ export class BotUpdate {
       const user = await this.prisma.users.findUnique({
         where: { chat_id: String(ctx.from?.id) },
       });
-      if (user) {
-        ctx.reply("Siz avval fo'rmani to'ldirgansiz");
-        return;
-      }
+      // if (user) {
+      //   ctx.reply("Siz avval fo'rmani to'ldirgansiz");
+      //   return;
+      // }
       ctx.reply(
         'Ism Familyangizni kriting.',
         Markup.keyboard([['Ortga']]).resize(),
@@ -475,10 +488,6 @@ export class BotUpdate {
           );
           return;
         }
-        if (!ctx.session.formData.till) {
-          ctx.session.formData.till = [];
-        }
-
         if (text === 'keyingi') {
           ctx.session.IsData.till = null;
           ctx.reply(
@@ -488,6 +497,10 @@ export class BotUpdate {
           ctx.session.IsData.addres_doyimiy = 'doyimiy';
           return;
         }
+        if (!ctx.session.formData.till) {
+          ctx.session.formData.till = [];
+        }
+
         if (text === 'Boshqa') {
           ctx.reply(
             "Qaysi tilni bilasiz qo'lda kriting",
@@ -508,6 +521,15 @@ export class BotUpdate {
               ['Ortga'],
             ]).resize(),
           );
+          return;
+        }
+        if (text === 'keyingi') {
+          ctx.session.IsData.till = null;
+          ctx.reply(
+            'Doimiy yashash manzilingizni kriting',
+            Markup.keyboard([['Ortga']]).resize(),
+          );
+          ctx.session.IsData.addres_doyimiy = 'doyimiy';
           return;
         } else {
           ctx.reply(`⚠️ ${text} allaqachon tanlangan.`);
@@ -840,6 +862,22 @@ export class BotUpdate {
             .resize()
             .oneTime(),
         );
+        ctx.session.formData = {
+          tel_1: null,
+          tel_2: null,
+          addres_doyimiy: null,
+          addres_hozir: null,
+          username: null,
+          fullName: null,
+          age: null,
+          yonalish: null,
+          daraja: null,
+          rezumey_link: null,
+          portfoly_link: null,
+          ish_holati: null,
+          till: [],
+          universitet: null,
+        };
         return;
       }
     }

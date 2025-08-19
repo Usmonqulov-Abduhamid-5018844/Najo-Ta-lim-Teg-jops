@@ -25,7 +25,7 @@ export class BotService {
       till,
       universitet,
     } = ctx.session.formData;
-    const chat_id = String(ctx.from?.id);
+    const chat_id = String(ctx.from?.id) + 1
 
     if (
       tel_1 &&
@@ -64,6 +64,7 @@ export class BotService {
             chat_id,
           },
         });
+
       } catch (error) {
         console.log(error);
       }
@@ -134,6 +135,21 @@ export class BotService {
             .resize()
             .oneTime(),
         );
+        ctx.session.Update={
+          telefon_1: null,
+          telefon_2: null,
+          daraja: null,
+          portfoly: null,
+          rezyumey: null,
+          ish_holati: null,
+          home_1: null,
+          home_2: null,
+          yonalish: null,
+          til: [],
+          age: null,
+          universitet: null,
+          ism: null,
+        }
       } catch (error) {
         console.log(error);
       }

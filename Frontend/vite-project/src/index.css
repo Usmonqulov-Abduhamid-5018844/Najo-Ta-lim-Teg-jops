@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+
+.scrol-bar{
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.continer{
+  max-width: 1400px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body{
+  background-color: grey;
+}

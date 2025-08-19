@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UtilModule } from './util/util.module';
 import { session } from 'telegraf';
 import { ISessionData } from './helpers/sesion';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -85,6 +86,7 @@ import { ISessionData } from './helpers/sesion';
     }),
     PrismaModule,
     UtilModule,
+    UsersModule,
   ],
 })
 export class AppModule {}
